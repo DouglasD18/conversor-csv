@@ -35,26 +35,28 @@ public class Conversor {
    */
   public void converterPasta(File pastaDeEntradas, File pastaDeSaidas) throws IOException {
     File[] listFiles = pastaDeEntradas.listFiles();
+
+    if (!pastaDeSaidas.exists()) {
+      pastaDeSaidas.mkdir();
+    }
+    System.out.println(pastaDeSaidas.isDirectory());
+
     FileReader fileReader = null;
     BufferedReader bufferedReader = null;
-    FileWriter fileWriter = null;
-    BufferedWriter bufferedWriter = null;
     for (File f : listFiles) {
-      System.out.println(pastaDeSaidas.getAbsolutePath() + "/" + f.getName());
-      System.out.println(f.getAbsolutePath());
       try {
         File inputFile = new File(f.getAbsolutePath());
         fileReader = new FileReader(inputFile);
         bufferedReader = new BufferedReader(fileReader);
 
         File outputFile = new File(pastaDeSaidas.getAbsolutePath() + "/" + f.getName());
-        outputFile.createNewFile();
-        fileWriter = new FileWriter(outputFile);
-        bufferedWriter = new BufferedWriter(fileWriter);
+        if (outputFile.exists()) {
+          outputFile.delete();
+        }
 
         String lineContent = bufferedReader.readLine();
-        bufferedWriter.write(lineContent);
-        bufferedWriter.flush();
+        String content = "";
+        content += lineContent + "\n";
 
         lineContent = bufferedReader.readLine();
 
@@ -69,21 +71,46 @@ public class Conversor {
           String fourth = contentList[3].substring(9);
           String cpf = first + "." + second + "." + third + "-" + fourth;
 
-          String newContent = name + "," + birth + "," + contentList[2] + "," + cpf;
+          String newContent = name + "," + birth + "," + contentList[2] + "," + cpf + "\n";
 
-          bufferedWriter.write(newContent);
-          bufferedWriter.flush();
+          content += newContent;
 
           lineContent = bufferedReader.readLine();
         }
 
         fileReader.close();
         bufferedReader.close();
-        fileWriter.close();
-        bufferedWriter.close();
+
+        System.out.println(content);
+        write(content, outputFile);
       } catch (IOException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  /**
+   * Write csv.
+   */
+  private void write(String content, File file) {
+    try {
+      if (!file.exists()) {
+        file.createNewFile();
+      }
+
+      FileWriter fileWriter = null;
+      BufferedWriter bufferedWriter = null;
+
+      fileWriter = new FileWriter(file);
+      bufferedWriter = new BufferedWriter(fileWriter);
+
+      bufferedWriter.write(content);
+      bufferedWriter.flush();
+
+      fileWriter.close();
+      bufferedWriter.close();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
